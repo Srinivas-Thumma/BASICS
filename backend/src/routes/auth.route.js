@@ -3,13 +3,15 @@ import express from "express";
 import {
   register,
   login,
-  refreshToken , logout
+  refreshToken , logout , getMe
 } from "../controllers/auth.controller.js";
 
 import { authenticate } from "../middleware/auth.middleware.js";
 
 // express.Router() creates a mini-app just for handling routes.
 const router = express.Router();
+
+router.get("/me", authenticate, getMe);
 
 router.post("/register", register);
 router.post("/login", login);

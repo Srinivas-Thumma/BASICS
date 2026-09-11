@@ -239,3 +239,25 @@ export const logout = async (req, res) => {
   }
 };
 
+export const getMe = async (req, res) => {
+  const userRepository = AppDataSource.getRepository(User);
+
+  const user = await userRepository.findOneBy({
+    id: req.user.id,
+  });
+
+  if (!user) {
+    return res.status(404).json({
+      message: "User not found",
+    });
+  }
+
+  return res.status(200).json({
+    user: {
+      id: user.id,
+      name: user.name,
+      email: user.email,
+    },
+  });
+};
+

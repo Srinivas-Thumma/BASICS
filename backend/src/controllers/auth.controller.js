@@ -129,7 +129,7 @@ export const login = async (req, res) => {
 
 export const refreshToken = async (req, res) => {
   try {
-    console.log("Cookies:", req.cookies);
+    // console.log("Cookies:", req.cookies);
 
     const token = req.cookies.refreshToken;
 

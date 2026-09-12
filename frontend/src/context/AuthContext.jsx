@@ -1,6 +1,7 @@
 import { createContext, useEffect, useState } from "react";
 import {
   loginUser,
+  registerUser,
   logoutUser,
   getMe,
 } from "../api/auth.api";
@@ -16,6 +17,12 @@ export const AuthProvider = ({ children }) => {
     setUser(result.user);
     return result;
   };
+
+  const register = async (data) => {
+  const result = await registerUser(data);
+  setUser(result.user);
+  return result;
+};
 
   const logout = async () => {
     await logoutUser();
@@ -42,6 +49,7 @@ export const AuthProvider = ({ children }) => {
       value={{
         user,
         login,
+        register,
         logout,
         isAuthenticated: !!user,
         loading,

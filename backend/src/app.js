@@ -6,6 +6,8 @@ import cors from "cors"
 import authRoutes from "./routes/auth.route.js";
 import taskRoutes from "./routes/task.route.js";
 
+import { verifyCsrfToken } from "./middleware/csrf.middleware.js";
+
 const app = express();
 
 app.use(express.json());
@@ -18,6 +20,8 @@ app.use(
     credentials:true,
   })
 )
+
+app.use(verifyCsrfToken);
 
 app.get('/api',(req,res) =>{
   res.json({message:"Hello World"})

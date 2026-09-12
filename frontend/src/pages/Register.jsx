@@ -1,7 +1,8 @@
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { registerUser } from "../api/auth.api";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/useAuth";
 
 const registerSchema = z.object({
   name: z
@@ -21,18 +22,30 @@ function Register() {
   const {
     register,
     handleSubmit,
+    setError,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(registerSchema),
   });
 
+  const { register: registerUser } = useAuth();
+
+  const navigate = useNavigate();
+
   const onSubmit = async (data) => {
     try {
-      const result = await registerUser(data);
+      await registerUser(data);
 
-      console.log("Registration successful:", result);
+      navigate("/tasks");
     } catch (error) {
       console.error("Registration failed:", error);
+
+      setError("root", {
+        type: "server",
+        message:
+          error.response?.data?.message ||
+          "Registration failed. Please try again.",
+      });
     }
   };
 
@@ -40,30 +53,54 @@ function Register() {
     <div>
       <h1>Register</h1>
 
+      {errors.root && (
+        <p>{errors.root.message}</p>
+      )}
+
       <form onSubmit={handleSubmit(onSubmit)}>
         <div>
           <label>Name</label>
+
           <input {...register("name")} />
 
-          {errors.name && <p>{errors.name.message}</p>}
+          {errors.name && (
+            <p>{errors.name.message}</p>
+          )}
         </div>
 
         <div>
           <label>Email</label>
-          <input type="email" {...register("email")} />
 
-          {errors.email && <p>{errors.email.message}</p>}
+          <input
+            type="email"
+            {...register("email")}
+          />
+
+          {errors.email && (
+            <p>{errors.email.message}</p>
+          )}
         </div>
 
         <div>
           <label>Password</label>
-          <input type="password" {...register("password")} />
 
-          {errors.password && <p>{errors.password.message}</p>}
+          <input
+            type="password"
+            {...register("password")}
+          />
+
+          {errors.password && (
+            <p>{errors.password.message}</p>
+          )}
         </div>
 
-        <button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Creating account..." : "Register"}
+        <button
+          type="submit"
+          disabled={isSubmitting}
+        >
+          {isSubmitting
+            ? "Creating account..."
+            : "Register"}
         </button>
       </form>
     </div>

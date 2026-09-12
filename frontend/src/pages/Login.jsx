@@ -18,7 +18,7 @@ const loginSchema = z.object({
 function Login() {
   const {
     register,
-    handleSubmit,
+    handleSubmit, setError,
     formState: { errors, isSubmitting },
   } = useForm({
     resolver: zodResolver(loginSchema),
@@ -37,13 +37,24 @@ function Login() {
       // Login successful → go to tasks
       navigate("/tasks");
     } catch (error) {
-      console.error("Login failed:", error);
-    }
+  console.error("Login failed:", error);
+
+  setError("root", {
+    type: "server",
+    message:
+      error.response?.data?.message ||
+      "Login failed. Please try again.",
+  });
+}
   };
 
   return (
     <div>
       <h1>Login</h1>
+
+      {errors.root && (
+  <p>{errors.root.message}</p>
+      )}
 
       <form onSubmit={handleSubmit(onSubmit)}>
         <div>

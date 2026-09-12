@@ -5,7 +5,7 @@ import { User } from "../entities/User.js";
 
 import { createAuthSession , setAuthCookies } from "../utils/auth.utils.js";
 import {
-  verifyRefreshToken,hashToken
+  verifyRefreshToken,hashToken,generateAccessToken
 } from "../utils/token.utils.js";
 
 export const register = async(req,res)=>{
@@ -168,11 +168,22 @@ export const refreshToken = async (req, res) => {
       });
     }
 
-    //Instead of just giving the user a new access token, it invalidates the old refresh token and generates a completely new pair of both tokens. This stops replay attacks (if a hacker steals a refresh token, it will only work once before becoming useless)
-    const { accessToken, refreshToken: newRefreshToken } =
-      await createAuthSession(user);
+  const accessToken = generateAccessToken(user.id);
 
-    setAuthCookies(res, accessToken, newRefreshToken);
+user.accessToken = hashToken(accessToken);
+user.accessTokenExpiresAt = new Date(
+  Date.now() + 15 * 60 * 1000
+);
+
+await userRepository.save(user);
+
+res.cookie("accessToken", accessToken, {
+  httpOnly: true,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/",
+  maxAge: 15 * 60 * 1000,
+});
 
     return res.status(200).json({
       message: "Token refreshed successfully",
@@ -225,6 +236,13 @@ export const logout = async (req, res) => {
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       path: "/",
+    });
+
+    res.clearCookie("csrfToken", {
+  httpOnly: false,
+  secure: process.env.NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/",
     });
 
     return res.status(200).json({
